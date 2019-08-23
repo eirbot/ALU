@@ -1,0 +1,17 @@
+#swap
+*.swp
+*.un~
+*.*~
+#vb
+*.user
+*.Cache
+*.pdb
+*.cache
+obj
+*.manifest
+*.xml
+*.vbshost.exe
+
+#eagle
+*.b#*
+*.s#*

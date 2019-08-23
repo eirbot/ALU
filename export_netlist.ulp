@@ -1,0 +1,31 @@
+#usage "<b>test</b>"
+
+output("connect.txt", "wt") {
+ 
+schematic(SCH) {
+  SCH.sheets(SH) {
+    SH.nets(N) {
+     // printf("%s\n", N.name);
+      N.segments(SEG) {
+        SEG.pinrefs(P) {
+	printf("%s,%s,%s\n",
+          P.instance.name, P.pin.name,N.name);
+          }
+        }
+      }
+    }
+  } 
+ } 
+
+output("part.txt", "wt") {
+ 
+schematic(S) {
+  S.parts(P) {
+//    printf("Part: %s %s\n", P.name, P.value);
+    P.instances(I) {
+      if (I.sheet != 0)
+         printf("%s,%s\n", I.name, I.value);
+      }
+    }
+  } 
+ } 
