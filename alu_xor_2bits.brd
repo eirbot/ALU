@@ -1495,7 +1495,7 @@ design rules under a new name.</description>
 <wire x1="38.1" y1="44.45" x2="33.02" y2="44.45" width="0.254" layer="16"/>
 <via x="33.02" y="44.45" extent="1-16" drill="0.21"/>
 </signal>
-<signal name="N$2">
+<signal name="ADD0">
 <contactref element="IC1" pad="8"/>
 <contactref element="IC18" pad="2"/>
 <wire x1="19.05" y1="48.26" x2="21.59" y2="48.26" width="0.254" layer="16"/>
@@ -1619,7 +1619,7 @@ design rules under a new name.</description>
 <wire x1="-10.16" y1="-30.48" x2="-5.08" y2="-30.48" width="0" layer="19" extent="1-1"/>
 <wire x1="-5.08" y1="-17.78" x2="-5.08" y2="-30.48" width="0" layer="19" extent="1-1"/>
 </signal>
-<signal name="N$24">
+<signal name="ADD1">
 <contactref element="IC4" pad="8"/>
 <contactref element="IC3" pad="2"/>
 <wire x1="-10.16" y1="-17.78" x2="2.54" y2="-35.56" width="0" layer="19" extent="1-1"/>
@@ -1655,7 +1655,7 @@ design rules under a new name.</description>
 <wire x1="-10.16" y1="-81.28" x2="-5.08" y2="-81.28" width="0" layer="19" extent="1-1"/>
 <wire x1="-5.08" y1="-55.88" x2="-5.08" y2="-81.28" width="0" layer="19" extent="1-1"/>
 </signal>
-<signal name="N$33">
+<signal name="ADD2">
 <contactref element="IC7" pad="8"/>
 <contactref element="IC6" pad="2"/>
 <wire x1="-10.16" y1="-55.88" x2="2.54" y2="-86.36" width="0" layer="19" extent="1-1"/>
@@ -1676,7 +1676,7 @@ design rules under a new name.</description>
 <wire x1="-10.16" y1="-106.68" x2="-5.08" y2="-106.68" width="0" layer="19" extent="1-1"/>
 <wire x1="-5.08" y1="-68.58" x2="-5.08" y2="-106.68" width="0" layer="19" extent="1-1"/>
 </signal>
-<signal name="N$38">
+<signal name="ADD3">
 <contactref element="IC10" pad="8"/>
 <contactref element="IC9" pad="2"/>
 <wire x1="-10.16" y1="-68.58" x2="2.54" y2="-111.76" width="0" layer="19" extent="1-1"/>

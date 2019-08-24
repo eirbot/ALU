@@ -18705,11 +18705,12 @@ Low profile connectors, straight&lt;p&gt;
 <wire x1="86.36" y1="93.98" x2="86.36" y2="106.68" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="N$2" class="0">
+<net name="ADD0" class="0">
 <segment>
 <pinref part="IC1" gate="C" pin="O"/>
 <wire x1="73.66" y1="137.16" x2="73.66" y2="68.58" width="0.1524" layer="91"/>
 <pinref part="IC18" gate="A" pin="D2"/>
+<label x="73.66" y="86.36" size="1.778" layer="95" rot="R90"/>
 </segment>
 </net>
 <net name="N$31" class="0">
@@ -18817,11 +18818,12 @@ Low profile connectors, straight&lt;p&gt;
 <junction x="157.48" y="165.1"/>
 </segment>
 </net>
-<net name="N$24" class="0">
+<net name="ADD1" class="0">
 <segment>
 <pinref part="IC4" gate="C" pin="O"/>
 <wire x1="137.16" y1="137.16" x2="137.16" y2="68.58" width="0.1524" layer="91"/>
 <pinref part="IC3" gate="A" pin="D2"/>
+<label x="137.16" y="86.36" size="1.778" layer="95" rot="R90"/>
 </segment>
 </net>
 <net name="N$28" class="0">
@@ -18879,11 +18881,12 @@ Low profile connectors, straight&lt;p&gt;
 <junction x="220.98" y="165.1"/>
 </segment>
 </net>
-<net name="N$33" class="0">
+<net name="ADD2" class="0">
 <segment>
 <pinref part="IC7" gate="C" pin="O"/>
 <wire x1="200.66" y1="137.16" x2="200.66" y2="68.58" width="0.1524" layer="91"/>
 <pinref part="IC6" gate="A" pin="D2"/>
+<label x="200.66" y="88.9" size="1.778" layer="95" rot="R90"/>
 </segment>
 </net>
 <net name="N$36" class="0">
@@ -18915,11 +18918,12 @@ Low profile connectors, straight&lt;p&gt;
 <junction x="284.48" y="165.1"/>
 </segment>
 </net>
-<net name="N$38" class="0">
+<net name="ADD3" class="0">
 <segment>
 <pinref part="IC10" gate="C" pin="O"/>
 <wire x1="264.16" y1="137.16" x2="264.16" y2="68.58" width="0.1524" layer="91"/>
 <pinref part="IC9" gate="A" pin="D2"/>
+<label x="264.16" y="86.36" size="1.778" layer="95" rot="R90"/>
 </segment>
 </net>
 <net name="C1" class="0">

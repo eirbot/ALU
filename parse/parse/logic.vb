@@ -10,6 +10,7 @@
         Public curr As Dictionary(Of String, Boolean)
     End Structure
 
+
     Sub New(ByRef _partref As Dictionary(Of String, String), ByRef _partdict As Dictionary(Of String, Dictionary(Of String, String)))
         partref = _partref
         partdict = _partdict
@@ -24,7 +25,52 @@
         Next
     End Sub
 
-    Function prop_delay(ByRef all_net As Dictionary(Of String, Boolean), ByVal inp As List(Of String), Optional ByVal detail As Boolean = False) As Integer
+    '                                           input state                         output state
+    Function check_add(ByRef all_net As Dictionary(Of String, Boolean),
+                       ByVal inpa As List(Of String), ByVal inpb As List(Of String), ByVal inpc As String,
+                       ByVal outy As List(Of String), ByVal outc As String, Optional ByVal detail As Boolean = False) As Boolean
+
+        Dim y As Integer
+        Dim ret As Boolean = True
+
+        Console.WriteLine("Checking add function ... ")
+
+        For c As Integer = 0 To 1
+            For b As Integer = 0 To inpb.Count - 1
+                For a As Integer = 0 To inpa.Count - 1
+                    For i As Integer = 0 To inpa.Count - 1
+                        all_net.Item(inpa(i)) = (a >> i) Mod 2
+                    Next
+                    For i As Integer = 0 To inpb.Count - 1
+                        all_net.Item(inpb(i)) = (b >> i) Mod 2
+                    Next
+                    all_net.Item(inpc) = c Mod 2
+
+                    While compute(all_net)
+                    End While
+
+                    y = 0
+                    For i As Integer = 0 To outy.Count - 1
+                        y += all_net.Item(outy(i)) And (&H1 << i)
+                    Next
+                    y += all_net.Item(outc) And (&H1 << outy.Count)
+
+                    If a + b + c <> y Then
+                        Console.WriteLine("error")
+                        ret = False
+                    End If
+
+                    If detail Then
+                        Console.WriteLine(a & " " & b & " " & c & " = " & y & ":" & a + b + c)
+                    End If
+                Next
+            Next
+        Next
+        Return ret
+    End Function
+
+
+    Function prop_delay(ByRef all_net As Dictionary(Of String, Boolean), ByVal inp As List(Of String), ByVal outp As List(Of String), Optional ByVal detail As Boolean = False) As Integer
         Dim inp_c As Integer = inp.Count - 1
         Dim states As New List(Of state_transition)
 
@@ -60,6 +106,8 @@
         Dim iter As Integer = 1
         Dim max As Integer = (2 ^ (2 * inp.Count) - 1) / 100
         Dim nCurrent As Integer = 1
+
+
         'for all config
         For Each s In states
             iter += 1
@@ -72,6 +120,7 @@
             While compute(all_net)
             End While
 
+            'generate  input value
             For Each k In s.curr
                 all_net.Item(k.Key) = k.Value
             Next
@@ -81,9 +130,11 @@
                 count += 1
             End While
 
+
             If count > maxcount Then
                 maxcount = count
             End If
+
             If detail Then
                 Console.WriteLine(dic_to_string(s.prev) & "->" & dic_to_string(s.curr) & " : " & count)
             Else

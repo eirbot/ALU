@@ -23,13 +23,25 @@
         While logic.compute(all_nets)
         End While
 
+        Dim add_ok As Boolean
+        add_ok = logic.check_add(all_nets, New List(Of String) From {"A0", "A1", "A2", "A3"},
+                        New List(Of String) From {"B0", "B1", "B2", "B3"}, "C0",
+                        New List(Of String) From {"ADD0", "ADD1", "ADD2", "ADD3"}, "C4")
+
+        If add_ok Then
+            Console.WriteLine("Adder Ok")
+        Else
+            Console.WriteLine("Adder fail !!! ")
+        End If
+        Console.WriteLine(vbCrLf)
+
 
         Dim maxprop As Integer = 0
-
         Console.WriteLine("Maximal propagation delay calculation ...")
-        maxprop = logic.prop_delay(all_nets, New List(Of String) From {"A0", "A1", "A2", "A3", "B0", "B1", "B2", "B3", "C0"}, False)
-
+        maxprop = logic.prop_delay(all_nets, New List(Of String) From {"A0", "A1", "A2", "A3", "B0", "B1", "B2", "B3", "C0"},
+                                            New List(Of String) From {"ADD0", "ADD1", "ADD2", "ADD3", "C4"}, False)
         Console.WriteLine("Maximal Gate propation : " & maxprop)
+
 
         Console.Write("stop ?")
         While Console.ReadLine() <> "O"
