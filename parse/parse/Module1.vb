@@ -10,40 +10,26 @@
         Dim partdict As New Dictionary(Of String, Dictionary(Of String, String))
         Dim all_nets As New Dictionary(Of String, Boolean)
 
+        Console.WriteLine("Parsing netlist file ...")
         Dim parse_file As New parse_file
         parse_file.read(partref, partdict, all_nets)
-
+        Console.WriteLine(vbTab & partdict.Count & " Gates, " & all_nets.Count & " Nets ..." & vbCrLf)
         Dim logic As New logic(partref, partdict)
 
-        Dim sv As Dictionary(Of String, String) = partdict.Item("SV1")
         Dim inputA As String
         Dim inputB As String
         Dim inputC As String
         Dim count As Integer = 0
         While logic.compute(all_nets)
-            count += 1
-            Console.WriteLine("+" & count)
         End While
 
-        Dim allnames As New List(Of String)
-        For Each n In all_nets
-            allnames.Add(n.Key)
-        Next
 
-
-        'Console.WriteLine(count & "CO : " & (all_nets.Item(sv.Item("45")) And &H1))
-        'Console.WriteLine(count & "OUT : " & (all_nets.Item("N66") And &H1) & (all_nets.Item("N94") And &H1))
-        Dim ast As String
-        Dim bst As String
-        Dim res As Integer
         Dim maxprop As Integer = 0
 
         Console.WriteLine("Maximal propagation delay calculation ...")
         maxprop = logic.prop_delay(all_nets, New List(Of String) From {"A0", "A1", "A2", "A3", "B0", "B1", "B2", "B3", "C0"}, False)
 
-
-        
-        Console.WriteLine("max prop " & maxprop)
+        Console.WriteLine("Maximal Gate propation : " & maxprop)
 
         Console.Write("stop ?")
         While Console.ReadLine() <> "O"
@@ -118,25 +104,4 @@
     End Function
 
 
-
-    Sub write_nand(ByVal file As String)
-        System.IO.File.AppendAllText(file, "entity 7400 is" & vbCrLf)
-        System.IO.File.AppendAllText(file, "port (a,b : in bit; s: out bit);" & vbCrLf)
-        System.IO.File.AppendAllText(file, "end entity" & vbCrLf)
-        System.IO.File.AppendAllText(file, "architecture behav of 7400 is" & vbCrLf)
-        System.IO.File.AppendAllText(file, "begin" & vbCrLf)
-        System.IO.File.AppendAllText(file, "s <= NOT (a AND b) ;" & vbCrLf)
-        System.IO.File.AppendAllText(file, "end architecture" & vbCrLf)
-    End Sub
-
-    Sub write_mux(ByVal file As String)
-        System.IO.File.AppendAllText(file, "entity 74151 is" & vbCrLf)
-        System.IO.File.AppendAllText(file, "port (a,b,c,g : in bit; d0,d1,d2,d3,d4,d5,d6,d7 : in bit; w,y: out bit);" & vbCrLf)
-        System.IO.File.AppendAllText(file, "end entity" & vbCrLf)
-        System.IO.File.AppendAllText(file, "architecture behav of 74151 is" & vbCrLf)
-        System.IO.File.AppendAllText(file, "signal state : std_logic_vertor(2 downto 0)" & vbCrLf)
-        System.IO.File.AppendAllText(file, "begin" & vbCrLf)
-        System.IO.File.AppendAllText(file, "y <= g AND ((a AND b) ;" & vbCrLf)
-        System.IO.File.AppendAllText(file, "end architecture" & vbCrLf)
-    End Sub
 End Module

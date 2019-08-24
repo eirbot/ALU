@@ -15,39 +15,65 @@
         partdict = _partdict
     End Sub
 
+    Sub add_state(ByRef states As List(Of state_transition), ByVal inp As List(Of String), ByVal ip As Integer, ByVal ic As Integer)
+        states.Add(New state_transition With {.curr = New Dictionary(Of String, Boolean),
+                                                    .prev = New Dictionary(Of String, Boolean)()})
+        For j As Integer = 0 To inp.Count - 1
+            states.Last.prev.Add(inp(j), (ip >> j) Mod 2)
+            states.Last.curr.Add(inp(j), (ic >> j) Mod 2)
+        Next
+    End Sub
+
     Function prop_delay(ByRef all_net As Dictionary(Of String, Boolean), ByVal inp As List(Of String), Optional ByVal detail As Boolean = False) As Integer
         Dim inp_c As Integer = inp.Count - 1
         Dim states As New List(Of state_transition)
 
-        'previous state -> new state
-        For ic As Integer = 0 To 2 ^ (inp.Count) - 1
-            For ip As Integer = 0 To 2 ^ (inp.Count) - 1
-                If ic <> ip Then
-                    states.Add(New state_transition With {.curr = New Dictionary(Of String, Boolean),
-                                                     .prev = New Dictionary(Of String, Boolean)()})
-                    For j As Integer = 0 To inp.Count - 1
-                        states.Last.prev.Add(inp(j), (ip >> j) Mod 2)
-                        states.Last.curr.Add(inp(j), (ic >> j) Mod 2)
-                    Next
-                End If
-            Next
-        Next
+        Console.WriteLine("Computing possible all states and transitions ... ")
 
+        Dim ip As Integer = 0
+        Dim ic As Integer = 1
+        Dim n As Integer = 2 ^ inp.Count - 1
+        While (ip < n - 1)
+
+            add_state(states, inp, ip, ic)
+
+            If (ic = n) Then
+                ip += 1
+            End If
+
+            add_state(states, inp, ic, ip)
+
+            If (ic = n) Then
+                ic = ip + 1
+            Else
+                ic += 1
+            End If
+
+        End While
+        add_state(states, inp, ip, ic)
+        add_state(states, inp, ic, 0)
+        Console.WriteLine(vbTab & states.Count & " possible transitions" & vbCrLf)
+
+        Console.WriteLine("Simulating all states ...")
         Dim count As Integer
         Dim maxcount As Integer = 0
-
+        Dim iter As Integer = 1
+        Dim max As Integer = (2 ^ (2 * inp.Count) - 1) / 100
+        Dim nCurrent As Integer = 1
         'for all config
         For Each s In states
+            iter += 1
             'put the system in prev state
-            For Each n In s.prev
-                all_net.Item(n.Key) = n.Value
+            For Each k In s.prev
+                all_net.Item(k.Key) = k.Value
             Next
+
 
             While compute(all_net)
             End While
 
-            For Each n In s.curr
-                all_net.Item(n.Key) = n.Value
+            For Each k In s.curr
+                all_net.Item(k.Key) = k.Value
             Next
 
             count = 0
@@ -60,8 +86,15 @@
             End If
             If detail Then
                 Console.WriteLine(dic_to_string(s.prev) & "->" & dic_to_string(s.curr) & " : " & count)
+            Else
+                If iter >= max Then
+                    iter = 1
+                    Console.Write("{0}Progression : {1}%", vbCr & vbTab, nCurrent)
+                    nCurrent += 1
+                End If
             End If
         Next
+        Console.WriteLine(vbCrLf & vbTab & "Done" & vbCrLf)
 
         Return maxcount
     End Function
