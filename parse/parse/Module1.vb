@@ -6,88 +6,21 @@
         Dim part As New List(Of String)
         Dim net As New List(Of String)
 
-        'parse part file
-        Dim idpart As Integer = FreeFile()
         Dim partref As New Dictionary(Of String, String)
-        Dim line(3) As String
-
-        FileOpen(idpart, "..\..\..\..\part.txt", OpenMode.Input, OpenAccess.Read)
-        While Not EOF(idpart)
-            line = LineInput(idpart).Split(",")
-            If line(0) = "SV1" Then
-                partref.Add("SV1", "SV")
-            Else
-                partref.Add(line(0), line(1))
-            End If
-        End While
-        FileClose(idpart)
-
-        'parse net file
-        Dim idnet As Integer = FreeFile()
         Dim partdict As New Dictionary(Of String, Dictionary(Of String, String))
         Dim all_nets As New Dictionary(Of String, Boolean)
-        Dim cur_net As String
-        FileOpen(idnet, "..\..\..\..\connect.txt", OpenMode.Input, OpenAccess.Read)
-        While Not EOF(idnet)
-            ' part, pin, net
-            line = LineInput(idnet).Split(",")
 
-            'throwing supply symbols
-            If line(0).StartsWith("P+") OrElse line(0).StartsWith("GND") Then
-                Continue While
-            End If
+        Dim parse_file As New parse_file
+        parse_file.read(partref, partdict, all_nets)
 
-            'throwing bypass caps and holes
-            If line(0).StartsWith("C") OrElse line(0).StartsWith("U$") Then
-                Continue While
-            End If
+        Dim logic As New logic(partref, partdict)
 
-            'throwing led, resistor
-            If line(0).StartsWith("R") OrElse line(0).StartsWith("LED") Then
-                Continue While
-            End If
-
-            'thowing supply pin
-            If line(0).EndsWith("P") Then
-                Continue While
-            End If
-
-            cur_net = line(2).Replace("$", "")
-            If partdict.ContainsKey(line(0)) Then
-                If Not partdict.Item(line(0)).ContainsKey(line(1)) Then
-                    partdict.Item(line(0)).Add(line(1), cur_net)
-                Else
-                    Console.Write("ERROR PART " & line(0) & " ON PIN " & line(1))
-                End If
-            Else
-                partdict.Add(line(0), New Dictionary(Of String, String) From {{line(1), cur_net}})
-            End If
-
-            If Not all_nets.ContainsKey(cur_net) Then
-                all_nets.Add(cur_net, False)
-            End If
-        End While
-        FileClose(idnet)
-
-        For Each n In partdict.Item("SV1")
-            Console.WriteLine(n.Key & " " & n.Value)
-        Next
-
-        For Each n In partdict
-            Console.WriteLine(partref.Item(n.Key))
-        Next
-
-        'Dim elem As List(Of String) = gen_netlist(partdict, partref)
-        'For Each e In elem
-        '    Console.WriteLine(e)
-        'Next
-        ' Dim stop as string
         Dim sv As Dictionary(Of String, String) = partdict.Item("SV1")
         Dim inputA As String
         Dim inputB As String
         Dim inputC As String
         Dim count As Integer = 0
-        While compute_logic(all_nets, partdict, partref)
+        While logic.compute(all_nets)
             count += 1
             Console.WriteLine("+" & count)
         End While
@@ -104,46 +37,10 @@
         Dim bst As String
         Dim res As Integer
         Dim maxprop As Integer = 0
-        For c As Integer = 0 To 1
-            For b As Integer = 0 To 15
-                For a As Integer = 0 To 15
-                    ast = cast_bit(CStr(a))
-                    bst = cast_bit(CStr(b))
-                    For i = 0 To 4
-                        all_nets.Item("A" & i) = Cbit(ast(i))
-                        all_nets.Item("B" & i) = Cbit(bst(i))
-                    Next
-                    If c = 0 Then
-                        all_nets.Item("C0") = False
-                    Else
-                        all_nets.Item("C0") = True
-                    End If
 
-                    count = 0
-                    While compute_logic(all_nets, partdict, partref)
-                        count += 1
-                    End While
-                    res = (all_nets.Item("N2") And &H1) + (all_nets.Item("N24") And &H2) + (all_nets.Item("N33") And &H4) + (all_nets.Item("N38") And &H8) +
-                                      (all_nets.Item("C4") And &H10)
-                    Console.WriteLine("C : " & c & " A : " & a & ":" & ast & vbTab & " B : " & b & ":" & bst & vbTab &
-                                      " => " & count & " OUT = " & vbTab & a + b + c & "=" & vbTab & res & ":" & vbTab &
-                                      (all_nets.Item("N2") And &H1) & (all_nets.Item("N24") And &H1) & (all_nets.Item("N33") And &H1) & (all_nets.Item("N38") And &H1) &
-                                      (all_nets.Item("C4") And &H1))
-                    If res <> a + b + c Then
-                        Console.WriteLine("FAIL")
-                    End If
-                    If count > maxprop Then
-                        maxprop = count
-                    End If
+        Console.WriteLine("Maximal propagation delay calculation ...")
+        maxprop = logic.prop_delay(all_nets, New List(Of String) From {"A0", "A1", "A2", "A3", "B0", "B1", "B2", "B3", "C0"}, False)
 
-                    For Each n In allnames
-                        all_nets.Item(n) = False
-                    Next
-                    While compute_logic(all_nets, partdict, partref)
-                    End While
-                Next
-            Next
-        Next
 
         
         Console.WriteLine("max prop " & maxprop)
@@ -163,7 +60,7 @@
             Console.WriteLine(inputB)
             all_nets.Item("C0") = Cbit(inputC(0))
 
-            While compute_logic(all_nets, partdict, partref)
+            While logic.compute(all_nets)
                 count += 1
             End While
 
@@ -175,54 +72,6 @@
 
         Console.ReadLine()
     End Sub
-
-    Function compute_logic(ByRef all_net As Dictionary(Of String, Boolean), ByVal partdict As Dictionary(Of String, Dictionary(Of String, String)), ByRef partref As Dictionary(Of String, String)) As Boolean
-        Dim pout As Boolean
-        Dim nout As Boolean
-        Dim has_chaged As Boolean = False
-        Dim new_out As New Dictionary(Of String, Boolean)
-
-        For Each p In partdict
-            With p.Value
-                Select Case partref.Item(p.Key)
-                    Case "74ALS00N"
-                        pout = all_net.Item(.Item("O"))
-                        nout = Not (all_net.Item(.Item("I0")) And all_net.Item(.Item("I1")))
-                        new_out.Add((.Item("O")), nout)
-                    Case "74LS151N"
-                        pout = all_net.Item(.Item("Y"))
-                        Dim adr As Integer = (all_net.Item(.Item("C")) And &H4) Or (all_net.Item(.Item("B")) And &H2) Or (all_net.Item(.Item("B")) And &H1)
-                        nout = all_net.Item(.Item("D" & adr)) And (Not all_net.Item(.Item("G")))
-                        new_out.Add(.Item("Y"), nout)
-                        'new_out.Add(.Item("W"))
-                    Case "74LS86N"
-                        pout = all_net.Item(.Item("O"))
-                        nout = (all_net.Item(.Item("I0")) Xor all_net.Item(.Item("I1")))
-                        new_out.Add((.Item("O")), nout)
-                    Case Else
-                        pout = False
-                        nout = False
-                End Select
-            End With
-            If nout <> pout Then
-                If verbose Then
-                    Console.WriteLine(p.Key)
-                End If
-
-                has_chaged = True
-            End If
-        Next
-
-        If has_chaged = True Then
-            For Each n In new_out
-                all_net.Item(n.Key) = n.Value
-            Next
-        End If
-        If verbose Then
-            Console.WriteLine("")
-        End If
-        Return has_chaged
-    End Function
 
     Function Cbit(ByVal c As Char) As Boolean
         If c = "1"c Then
